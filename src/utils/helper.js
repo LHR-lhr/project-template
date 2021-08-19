@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * 函数防抖 (只执行最后一次点击)
  * @param {function} fn - 要被应用防抖的函数
@@ -203,6 +204,95 @@ const QuickSort = (arr, low = 0, high = arr.length > 0 ? arr.length - 1 : -1) =>
     return false
   }
 }
+const esSort = (arr, fn) =>{
+  var resArr = arr;
+    if(Object.prototype.toString.call(fn)==='[object Function]'){
+        //如果传进来参数的是函数
+        for(var i = 0;i<resArr.length-1;i++){
+            //遍历数组,将前后两项作为实参传给fn
+            if(fn.call(resArr,resArr[i],resArr[i+1])>0){
+                //如果fn执行之后的返回值大于0.就调用swap方法交换位置
+                var a = resArr[i],b=resArr[i+1];
+                resArr[i] = swap(a,b).a;
+                resArr[i+1] = swap(a,b).b;
+                //交换之后，如果当前项不是第一项，则当前项(索引为i的项)继续跟前面的项进行比较
+                if(i>0){
+                    for(var j = i-1;j>=0;j--){
+                            if(fn.call(resArr,resArr[j],resArr[j+1])>0){
+                                var a = resArr[j],b=resArr[j+1];
+                                resArr[j] = swap(a,b).a;
+                                resArr[j+1] = swap(a,b).b;
+                            }
+                        }
+                }
+            }
+        }
+    }else{
+        //如果不是函数，则按正常排序
+        //遍历数组，将前后两项进行比较
+        for(var i = 0;i<resArr.length-1;i++){
+            var cur = resArr[i];//当前项
+            var next = resArr[i+1];//下一项
+            if(comASCII(cur,next)){
+                //当返回true的时候交换，并且交换完成之后，当前项继续往前比较
+                resArr[i] = swap(cur,next).a;
+                resArr[i+1] = swap(cur,next).b;
+                //当前项继续向前比较
+                if(i>0){
+                    for(var k = i-1;k>=0;k--){
+                        var cur = resArr[k];
+                        var next = resArr[k+1];
+                        if(comASCII(cur,next)){
+                            resArr[k] = swap(cur,next).a;
+                            resArr[k+1] = swap(cur,next).b;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //封装一个交换位置的函数
+    function swap(a,b){
+        return {
+            a:b,
+            b:a
+        }
+    }
+    //如果不传参的情况下比较ASCII码
+    function comASCII(cur,next){
+        //全部转换为字符串、逐项比较ASCII码
+        cur = cur.toString();
+        next = next.toString();
+        //取长度最大值
+        var len = cur.length>next.length?next.length:cur.length;
+        //当前后两项都不是不是{}类型的数据时，进行比较
+        if(cur!=='[object Object]'&&next!=='[object Object]'){
+            for(var j = 0;j<len;j++){
+                if(!isNaN(cur.charCodeAt(j))&&!isNaN(next.charCodeAt(j))){
+                    //如果二者的ASCII码都是有效数字
+                    if(cur.charCodeAt(j)>next.charCodeAt(j)){
+                        //如果前一项比后一项当前的ASCII码大，则返回true，交换位置
+                        return true;
+                    }else if(cur.charCodeAt(j)==next.charCodeAt(j)){
+                    //如果相等直接进入下一轮循环
+                            continue;
+                        }else{
+                        //前项比后项小，直接返回false
+                            return false;
+                        }
+                }
+            }
+            if(!isNaN(cur.charCodeAt(len))&&isNaN(next.charCodeAt(len))&&(cur.charCodeAt(len-1)==next.charCodeAt(len-1))){
+                //比较完之后，如果前一项ASCII还是有效数字，说明前项比后项大，交换
+                return true;
+            }
+        }
+        //如果上述条件不满足，则不交换
+        return false;
+    } 
+    //返回当前数组
+    return resArr;
+};
 
 export {
   debounce,
@@ -210,5 +300,6 @@ export {
   isType,
   deepClone,
   cache,
-  QuickSort
+  QuickSort,
+  esSort
 }
